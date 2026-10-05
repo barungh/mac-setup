@@ -2,7 +2,7 @@
 # mac-setup bootstrap — Tej Infomedia
 #
 # Usage (keeps the terminal attached so Homebrew can ask for the password):
-#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/<you>/mac-setup/main/bootstrap.sh)"
+#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/barungh/mac-setup/main/bootstrap.sh)"
 #
 # Safe to re-run: existing configs are moved to ~/.config-backup/<timestamp>/
 # before being replaced with symlinks into ~/.mac-setup.
@@ -22,7 +22,6 @@ die()  { printf '%sxx  %s%s\n' "$red" "$*" "$reset" >&2; exit 1; }
 # ---------------------------------------------------------------- preflight
 [[ $(uname -s) == Darwin ]] || die "This script is for macOS only."
 [[ $EUID -ne 0 ]] || die "Run as the normal user, not with sudo."
-[[ $REPO_URL != *"barungh"* ]] || die "Edit REPO_URL in bootstrap.sh (or pass REPO_URL=...)."
 
 macos_ver=$(sw_vers -productVersion)
 (( ${macos_ver%%.*} >= 13 )) || warn "macOS $macos_ver detected: Ghostty needs 13+; some casks may fail."
