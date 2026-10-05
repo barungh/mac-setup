@@ -1,0 +1,19 @@
+// Zed — settings for a Python beginner (managed by ~/.mac-setup)
+{
+  "ui_font_size": 16,
+  "buffer_font_size": 16,
+  "buffer_font_family": "JetBrainsMono Nerd Font",
+  "theme": { "mode": "system", "light": "One Light", "dark": "One Dark" },
+
+  "tab_size": 4,
+  "format_on_save": "on",
+  "soft_wrap": "editor_width",
+  "show_whitespaces": "boundary",
+  "inlay_hints": { "enabled": false },
+
+  // Learning first: no AI completions or chat
+  "disable_ai": true,
+
+  "terminal": { "font_family": "JetBrainsMono Nerd Font", "font_size": 15 },
+  "telemetry": { "diagnostics": false, "metrics": false }
+}

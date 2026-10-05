@@ -1,0 +1,89 @@
+# ~/.zshrc — managed by ~/.mac-setup (edit there, or use ~/.zshrc.local)
+# Rule: nothing here shadows a real command (no ls/cat/find/grep aliases),
+# so commands pasted from tutorials always behave as written.
+
+[[ -o interactive ]] || return
+
+# ------------------------------------------------------------ Homebrew & PATH
+if   [[ -x /opt/homebrew/bin/brew ]]; then eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -x /usr/local/bin/brew    ]]; then eval "$(/usr/local/bin/brew shellenv)"; fi
+BREW_PREFIX=${HOMEBREW_PREFIX:-/opt/homebrew}
+
+typeset -U path fpath                       # no duplicates on `reload`
+path=("$HOME/.local/bin" $path)             # uv's python shims + tools
+
+export EDITOR=nvim VISUAL=nvim
+# Student using git? Give them a friendlier commit editor:
+#   git config --global core.editor "zed --wait"
+
+# ------------------------------------------------------------ Options & history
+setopt AUTO_CD INTERACTIVE_COMMENTS NO_BEEP
+HISTFILE=~/.zsh_history HISTSIZE=50000 SAVEHIST=50000
+setopt HIST_IGNORE_SPACE HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS SHARE_HISTORY EXTENDED_HISTORY
+
+# Keep obvious secrets out of the history file.
+zshaddhistory() {
+  emulate -L zsh
+  [[ $1 != *(chpasswd|PASSWORD=|[Pp]assword=|[Tt]oken|[Ss]ecret|api[_-]key)* ]]
+}
+
+# ------------------------------------------------------------ Completion
+fpath=("$BREW_PREFIX/share/zsh-completions" "$BREW_PREFIX/share/zsh/site-functions" $fpath)
+autoload -Uz compinit
+() {  # full rebuild at most once a day, cached otherwise
+  setopt local_options extended_glob
+  if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) || ! -e ${ZDOTDIR:-$HOME}/.zcompdump ]]
+  then compinit; else compinit -C; fi
+}
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'      # case-insensitive
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':completion:*' menu no                             # fzf-tab takes over
+zstyle ':fzf-tab:complete:cd:*'    fzf-preview 'eza -1 --color=always --icons $realpath'
+zstyle ':fzf-tab:complete:z:*'     fzf-preview 'eza -1 --color=always --icons $realpath'
+
+[[ -r ~/.zsh/plugins/fzf-tab/fzf-tab.plugin.zsh ]] && source ~/.zsh/plugins/fzf-tab/fzf-tab.plugin.zsh
+(( $+commands[uv] )) && eval "$(uv generate-shell-completion zsh)"
+
+# ------------------------------------------------------------ Tools
+if (( $+commands[fzf] )); then
+  export FZF_DEFAULT_COMMAND='fd --type f --hidden --exclude .git'
+  export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
+  export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
+  export FZF_CTRL_T_OPTS="--preview 'bat --color=always --style=numbers --line-range=:200 {}'"
+  export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --color=always --icons {}'"
+  source <(fzf --zsh)      # Ctrl-T files, Ctrl-R history, Alt-C cd
+fi
+(( $+commands[zoxide] )) && eval "$(zoxide init zsh)"   # z <dir>, zi (interactive)
+
+# yazi: `y` opens it; quitting leaves you in the directory you browsed to
+y() {
+  local tmp cwd
+  tmp="$(mktemp -t yazi-cwd.XXXXXX)"
+  yazi "$@" --cwd-file="$tmp"
+  IFS= read -r -d '' cwd < "$tmp"
+  [[ -n $cwd && $cwd != "$PWD" ]] && builtin cd -- "$cwd"
+  rm -f -- "$tmp"
+}
+
+# ------------------------------------------------------------ Aliases
+alias l='eza --group-directories-first --icons=auto'
+alias ll='eza -lh --git --group-directories-first --icons=auto'
+alias la='ll -a'
+alias lt='eza --tree --level=2 --git-ignore --icons=auto'
+alias b='bat'
+alias v='nvim'
+alias lg='lazygit'
+alias py='uv run python'
+alias ..='cd ..' ...='cd ../..'
+alias reload='exec zsh'
+
+# ------------------------------------------------------------ Prompt & plugins (keep last)
+(( $+commands[starship] )) && eval "$(starship init zsh)"
+[[ -r $BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] \
+  && source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+[[ -r ~/.config/zsh/secrets.zsh ]] && source ~/.config/zsh/secrets.zsh   # chmod 600
+[[ -r ~/.zshrc.local ]] && source ~/.zshrc.local
+# syntax highlighting must be the very last thing sourced
+[[ -r $BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] \
+  && source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"

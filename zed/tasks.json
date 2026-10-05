@@ -1,0 +1,11 @@
+// Global Zed tasks. Cmd+R runs the open Python file (see keymap.json).
+[
+  {
+    "label": "Run Python file",
+    "command": "uv run \"$ZED_FILE\"",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always"
+  }
+]

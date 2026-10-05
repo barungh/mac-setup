@@ -1,0 +1,19 @@
+# Ghostty — ~/.config/ghostty/config  (reload: Cmd+Shift+,)
+font-family = JetBrainsMono Nerd Font
+font-size = 15
+theme = dark:Catppuccin Mocha,light:Catppuccin Latte
+
+window-padding-x = 10
+window-padding-y = 8
+window-save-state = always
+macos-titlebar-style = tabs
+# Left Option acts as Alt (Alt-C for fzf, Alt-b/f word jumps); right Option still types symbols
+macos-option-as-alt = left
+
+cursor-style = block
+mouse-hide-while-typing = true
+copy-on-select = clipboard
+confirm-close-surface = false
+
+# ssh-terminfo/ssh-env: remote hosts (your OCI box) understand Ghostty's TERM
+shell-integration-features = no-cursor,sudo,title,ssh-env,ssh-terminfo
